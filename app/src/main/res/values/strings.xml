@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Bi4RemoteAndroid</string>
+    <string name="settings">settings</string>
+    <string name="ip">ip</string>
+    <string name="tcp_port">tcp_port</string>
+    <string name="udp_port">udp_port</string>
+    <string name="user_name">user_name</string>
+    <string name="password">password</string>
+    <string name="messenger">messenger</string>
+    <string name="turn_on">Press to On</string>
+    <string name="turn_off">Press to Off</string>
+</resources>
