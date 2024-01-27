@@ -88,13 +88,9 @@ public class TCPListener extends Thread {
                 }
                 continue;
             }
-//            connected_to_radio();
             try {
-
-//                BufferedInputStream is = new BufferedInputStream(mSocket.getInputStream());
-//                ByteBuffer is = new ByteBuffer(mSocket.getInputStream());
+                InputStream is = mSocket.getInputStream();
                 OutputStream os = mSocket.getOutputStream();
-
 
                 try {
                     byte[] commandAuth = (new CMD(CommandsDirection.TO_SERVER, CommandsType.CMD_AUTORISATION_TOKEN, mUsername + " " + mPassword)).toMsgPackBytes();
@@ -107,16 +103,21 @@ public class TCPListener extends Thread {
                 catch (IOException e){
                     e.printStackTrace();
                 }
+                byte[] version = new byte[3];
+                int count = 0;
+                while(count < 3) {
+                    byte[] buf = new byte[100];
+                    int n = is.read(buf,0, 1);
+                    if( n < 0 ) break;
+                    version[count] = buf[0];
+                    count ++;
+                }
+                System.out.println(String.format("Receive version bi4remote: %d.%d.%d", version[0], version[1], version[2]));
 
-                MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(mSocket.getInputStream());
+                MessageUnpacker unpacker = MessagePack.newDefaultUnpacker(is);
                 while (!mTerminate)
                 {
                     while(unpacker.hasNext()){
-                        // [Advanced] You can check the detailed data format with getNextFormat()
-                        // Here is a list of message pack data format: https://github.com/msgpack/msgpack/blob/master/spec.md#overview
-                        MessageFormat format = unpacker.getNextFormat();
-
-                        // You can also use unpackValue to extract a value of any type
                         Value v = unpacker.unpackValue();
                         switch (v.getValueType()) {
                             case NIL:
@@ -157,7 +158,6 @@ public class TCPListener extends Thread {
                                 System.out.println("read binary: size=" + mb.length);
                                 break;
                             case ARRAY:
-                                System.out.println("VVVVVVVV");
                                 ArrayValue a = v.asArrayValue();
                                 int cmd = -1;
                                 String value = "";
@@ -168,9 +168,11 @@ public class TCPListener extends Thread {
                                     else if(e.isStringValue()){
                                         value = e.asStringValue().asString();
                                     }
-
                                 }
-                                System.out.println(String.format("read array element. CMD:%d, VALUE:%s ", cmd, value));
+                                if(cmd >=0)
+                                {
+                                    executeCmd(new CMD(cmd, value));
+                                }
                                 break;
                             case EXTENSION:
                                 ExtensionValue ev = v.asExtensionValue();
@@ -186,6 +188,7 @@ public class TCPListener extends Thread {
                                 break;
                         }
                     }
+
                 }
                 System.out.println("close socket");
                 mSocket.close();

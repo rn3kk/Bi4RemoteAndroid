@@ -20,12 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.msgpack.core.MessageBufferPacker;
-import org.msgpack.core.MessagePack;
-
-import java.io.IOException;
-import java.util.Arrays;
-
 
 public class MainActivity extends AppCompatActivity implements Handler.Callback, ServiceConnection{
 
@@ -75,21 +69,21 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
                 startActivity(intent);
                 return true;
             case R.id.connect_menu_item:
-                if(RadioState.mConnected == false) {
-                    intent = new Intent(this, RadioService.class);
-                    if (!RadioService.isInstanceCreated()) {
-                        if (intent != null) {
-                            intent.putExtra(String.valueOf(R.string.messenger), new Messenger(mMessageHandler));
-                            startService(intent);
-                            bindService(intent, this, Context.BIND_AUTO_CREATE);
-                        }
-                    }
-                }
-                else{
-                    intent = new Intent(this, RadioService.class);
-                    unbindService(this);
-                    stopService(intent);
-                }
+//                if(RadioModel.mConnected == false) {
+//                    intent = new Intent(this, RadioService.class);
+//                    if (!RadioService.isInstanceCreated()) {
+//                        if (intent != null) {
+//                            intent.putExtra(String.valueOf(R.string.messenger), new Messenger(mMessageHandler));
+//                            startService(intent);
+//                            bindService(intent, this, Context.BIND_AUTO_CREATE);
+//                        }
+//                    }
+//                }
+//                else{
+//                    intent = new Intent(this, RadioService.class);
+//                    unbindService(this);
+//                    stopService(intent);
+//                }
                 return true;
             case R.id.help_menu_item:
                 return true;
@@ -108,14 +102,32 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
         if( message.obj != null) {
             CMD cmdFromRadioServer = (CMD) message.obj;
             switch (cmdFromRadioServer.cmd){
+                case CommandsType.FROM_RADIO_STATE: {
+                    int value = Integer.parseInt(cmdFromRadioServer.value);
+                    break;
+                }
+                case  CommandsType.FROM_RADIO_AUTHORISATION_STATE: {
+                    int value = Integer.parseInt(cmdFromRadioServer.value);
+                    if (value == 1) {
+                        MenuItem m = mMenu.findItem(R.id.connect_menu_item);
+                        m.setTitle("DISC");
+//                        RadioModel.mConnected = true;
+                    }
+                    else{
+                        MenuItem m = mMenu.findItem(R.id.connect_menu_item);
+                        m.setTitle("CONN");
+//                        RadioModel.mConnected = true;
+                    }
+                    break;
+                }
                 case CommandsType.FROM_RADIO_PINS_PWR_STATE:
                     int value = Integer.parseInt(cmdFromRadioServer.value);
                     if(value == 1) {
-                        RadioState.mPwrState = 1;
+//                        RadioModel.mPwrState = 1;
                         mPwrBtn.setText(R.string.turn_off);
                     }
                     else {
-                        RadioState.mPwrState = 0;
+//                        RadioModel.mPwrState = 0;
                         mPwrBtn.setText(R.string.turn_on);
                     }
                     break;
@@ -123,24 +135,23 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
                     String str  = cmdFromRadioServer.value;
                     mSmeter.setText(str);
                     break;
-                case CommandsType.FROM_RADIO_FREQ:
-                    value = Integer.parseInt(cmdFromRadioServer.value);
-                    RadioState.mFreq = value;
+//                case CommandsType.FROM_RADIO_FREQ:
+//                    value = Integer.parseInt(cmdFromRadioServer.value);
+//                    RadioState.mFreq = value;
             }
 
         }
-        else if(message.arg1 == CommandsType.CONNECTED_TO_RADIO){
-            System.out.println("change menu");
-            MenuItem m = mMenu.findItem(R.id.connect_menu_item);
-            m.setTitle("DISC");
-            RadioState.mConnected = true;
-        }
-        else if(message.arg1 == CommandsType.DISCONNECTED_FROM_RADIO){
-            System.out.println("change menu2");
-            MenuItem m = mMenu.findItem(R.id.connect_menu_item);
-            m.setTitle("CONN");
-            RadioState.mConnected = false;
-        }
+//        else if(message.arg1 == CommandsType.CONNECTED_TO_RADIO){
+//            MenuItem m = mMenu.findItem(R.id.connect_menu_item);
+//            m.setTitle("DISC");
+//            RadioState.mConnected = true;
+//        }
+//        else if(message.arg1 == CommandsType.DISCONNECTED_FROM_RADIO){
+//            System.out.println("change menu2");
+//            MenuItem m = mMenu.findItem(R.id.connect_menu_item);
+//            m.setTitle("CONN");
+//            RadioState.mConnected = false;
+//        }
 
         return true;
     }
@@ -163,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
         @Override
         public void onClick(View view) {
             if(mBinder != null){
-                mBinder.power_on_state( RadioState.mPwrState == 1? 0:1);
+//                mBinder.power_on_state( RadioModel.mPwrState == 1? 0:1);
             }
         }
     };

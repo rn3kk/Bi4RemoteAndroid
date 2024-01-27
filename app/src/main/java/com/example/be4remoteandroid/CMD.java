@@ -25,7 +25,7 @@ public class CMD {
         this.value = value;
     }
 
-    CMD(int cmd, String value) {
+    public CMD(int cmd, String value) {
         this.direction = 0;
         this.cmd = cmd;
         this.value = value;

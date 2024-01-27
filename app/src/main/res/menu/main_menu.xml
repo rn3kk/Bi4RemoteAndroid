@@ -5,10 +5,10 @@
         android:title="Settings"
         app:showAsAction="never"/>
     <item android:id="@+id/connect_menu_item"
-        android:title="Conn"
+        android:title="conn"
+        app:showAsAction="always"/>
+    <item android:id="@+id/change_pwr_menu_item"
+        android:title="on"
         app:showAsAction="always"/>
 
-    <item android:id="@+id/help_menu_item"
-        android:title="Help"
-        app:showAsAction="never"/>
 </menu>
